@@ -18,6 +18,10 @@ RUN apt-get update && apt-get install -y \
 # Aktifkan mod_rewrite Apache (kalau pakai .htaccess)
 RUN a2enmod rewrite
 
+# Fix "More than one MPM loaded" - pastikan hanya mpm_prefork yang aktif
+RUN a2dismod mpm_event mpm_worker 2>/dev/null || true \
+    && a2enmod mpm_prefork
+
 # Copy seluruh project ke document root Apache
 COPY . /var/www/html/
 
