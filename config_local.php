@@ -1,13 +1,14 @@
 <?php
 // config_local.php — Railway production config
-// Railway menyediakan env var otomatis saat kamu tambah plugin MySQL
- 
-$db_host = getenv('MYSQLHOST') ?: 'localhost';
-$db_port = getenv('MYSQLPORT') ?: '3306';
-$db_name = getenv('MYSQLDATABASE') ?: 'railway';
-$db_user = getenv('MYSQLUSER') ?: 'root';
-$db_pass = getenv('MYSQLPASSWORD') ?: '';
- 
+// Pakai kredensial PUBLIC NETWORK Railway langsung (paling pasti jalan,
+// tidak bergantung ke variable reference ${{MySQL.xxx}} yang ternyata
+// gagal ke-resolve di environment ini)
+
+$db_host = 'reseau.proxy.rlwy.net';
+$db_port = '50633';
+$db_name = 'railway';
+$db_user = 'root';
+$db_pass = 'mFkaTqhZvugFvMCkkxEguxRRVSMNGhqU';
+
 // Tesseract sudah terinstall otomatis lewat Dockerfile
 $tesseract_path = '/usr/bin/tesseract';
- 
