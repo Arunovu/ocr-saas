@@ -8,7 +8,7 @@ $db_host = 'reseau.proxy.rlwy.net';
 $db_port = '50633';
 $db_name = 'railway';
 $db_user = 'root';
-$db_pass = 'mFkaTqhZvugFvMCkkxEguxRRVSMNGhqU';
+$db_pass = 'BBrgQnfCcBprqnIHAKqaluvBhXpwMQGn';
 
 // Tesseract sudah terinstall otomatis lewat Dockerfile
 $tesseract_path = '/usr/bin/tesseract';
