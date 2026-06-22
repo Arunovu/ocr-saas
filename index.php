@@ -130,9 +130,9 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                         
                         <h4 class="text-sm font-semibold text-slate-200 text-center mb-1">
-                            Pilih gambar atau seret file ke sini
+                            Pilih gambar, seret, atau tempel dari clipboard
                         </h4>
-                        <p class="text-xs text-slate-500 text-center">PNG, JPG, JPEG sampai 5MB</p>
+                        <p class="text-xs text-slate-500 text-center">PNG, JPG, JPEG sampai 5MB &nbsp;&bull;&nbsp; Tekan <kbd class="px-1.5 py-0.5 text-[10px] rounded bg-slate-700 border border-slate-600 text-slate-300 font-mono">Ctrl+V</kbd> untuk paste gambar</p>
                         
                         <!-- File Info Panel (Hidden by default) -->
                         <div id="file-info" class="hidden mt-6 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 items-center gap-3">
@@ -259,6 +259,61 @@ require_once __DIR__ . '/includes/header.php';
 
     // File input change
     fileInput.addEventListener('change', handleFileSelect);
+
+    // ── Clipboard Paste support ──────────────────────────────────────────────
+    // Listen globally so Ctrl+V anywhere on the page works
+    document.addEventListener('paste', (e) => {
+        const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items;
+        if (!items) return;
+
+        for (const item of items) {
+            if (item.type.startsWith('image/')) {
+                const file = item.getAsFile();
+                if (!file) continue;
+
+                // Basic size check (5 MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showToast('Ukuran file tidak boleh lebih dari 5MB!', 'error');
+                    return;
+                }
+
+                // Inject the pasted file into the hidden file input
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+
+                // Provide a generated filename since clipboard items have no name
+                const ext = file.type === 'image/png' ? 'png' : 'jpg';
+                const fakeName = 'clipboard_' + Date.now() + '.' + ext;
+
+                // Flash the drop zone to give visual feedback
+                dropZone.classList.add('border-brand-500/70', 'bg-slate-950/50');
+                setTimeout(() => dropZone.classList.remove('border-brand-500/70', 'bg-slate-950/50'), 600);
+
+                // Open crop modal directly
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    const previewImg = document.getElementById('crop-image');
+                    previewImg.src = ev.target.result;
+                    document.getElementById('original-filename').value = fakeName;
+                    document.getElementById('crop-modal').classList.remove('hidden');
+                    if (window.cropper) window.cropper.destroy();
+                    window.cropper = new Cropper(previewImg, { viewMode: 1, autoCropArea: 1 });
+                };
+                reader.readAsDataURL(file);
+
+                // Show the file-info badge
+                fileName.textContent = fakeName;
+                fileInfo.classList.remove('hidden');
+                fileInfo.classList.add('flex');
+                submitBtn.setAttribute('disabled', 'true');
+
+                showToast('Gambar dari clipboard berhasil ditempel!', 'success');
+                break; // only handle the first image item
+            }
+        }
+    });
+    // ────────────────────────────────────────────────────────────────────────
 
     function handleFileSelect() {
         if (fileInput.files.length > 0) {
